@@ -1,0 +1,22 @@
+artifact_path: file:///C:/Users/ruths/Desktop/week12/Fraud-detection-week-5/mlruns/1/models/m-3566bd0f2e994ddaae9c1d9bf7f73c26/artifacts
+flavors:
+  python_function:
+    data: model.ubj
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.xgboost
+    python_version: 3.12.3
+  xgboost:
+    code: null
+    data: model.ubj
+    model_class: xgboost.sklearn.XGBClassifier
+    model_format: ubj
+    xgb_version: 3.1.2
+mlflow_version: 3.9.0
+model_id: m-3566bd0f2e994ddaae9c1d9bf7f73c26
+model_size_bytes: 317637
+model_uuid: m-3566bd0f2e994ddaae9c1d9bf7f73c26
+prompts: null
+run_id: 9e06c5c706864a57864f43cf4034e6bf
+utc_time_created: '2026-02-17 15:10:08.978670'
