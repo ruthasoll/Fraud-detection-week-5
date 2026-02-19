@@ -4,7 +4,11 @@ from src.utils.config import Config
 from src.data.loader import DataLoader
 from src.utils.monitoring import Monitor
 
-def check_drift():
+def check_drift() -> None:
+    """
+    Orchestrates the data drift analysis process.
+    Loads reference and current data, aligns features, and generates an HTML report.
+    """
     config = Config()
     loader = DataLoader(config)
     
@@ -22,8 +26,6 @@ def check_drift():
     curr_df = pd.read_csv(inference_log_path)
     
     # 1. Align columns: use only features present in both
-    # Raw fraud data columns: user_id, signup_time, purchase_time, purchase_value, device_id, source, browser, sex, age, ip_address, class
-    # Inference log columns: user_id, signup_time, purchase_time, purchase_value, device_id, source, browser, sex, age, ip_address, fraud_probability, prediction
     features = ['purchase_value', 'source', 'browser', 'sex', 'age', 'ip_address']
     
     ref_df = ref_df[features]

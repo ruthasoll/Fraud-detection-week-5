@@ -3,6 +3,7 @@ import os
 
 @dataclass
 class Config:
+    """Project-wide configuration settings using dataclasses."""
     # MLflow settings
     MLFLOW_TRACKING_URI: str = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
     MLFLOW_EXPERIMENT_NAME: str = "Fraud_Detection_Week_12"

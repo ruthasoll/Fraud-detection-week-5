@@ -32,7 +32,8 @@ class Transaction(BaseModel):
     ip_address: int
 
 @app.on_event("startup")
-def load_artifacts():
+def load_artifacts() -> None:
+    """Loads model and feature engineering artifacts on API startup."""
     global model, fe
     try:
         # Try to load from MLflow if tracking URI is reachable
@@ -56,11 +57,21 @@ def load_artifacts():
         # Fallback logic could go here
 
 @app.get("/health")
-def health_check():
+def health_check() -> Dict[str, Any]:
+    """Returns the health status of the API and loaded artifacts."""
     return {"status": "healthy", "model_loaded": model is not None, "preprocessor_loaded": fe is not None}
 
 @app.post("/predict")
-def predict(tx: Transaction):
+def predict(tx: Transaction) -> Dict[str, Any]:
+    """
+    Receives transaction data, calculates real-time velocity, and predicts fraud risk.
+    
+    Args:
+        tx (Transaction): Transaction data in JSON format.
+        
+    Returns:
+        Dict: Fraud probability, binary prediction, and risk level.
+    """
     if model is None or fe is None:
         raise HTTPException(status_code=503, detail="Model or preprocessor not loaded")
     

@@ -5,25 +5,31 @@ from typing import List, Tuple, Optional
 from src.utils.config import Config
 
 class FeatureEngineer:
+    """Handles feature engineering, scaling, and encoding for fraud detection."""
+    
     def __init__(self, config: Config):
+        """Initializes the FeatureEngineer with a configuration object."""
         self.config = config
         self.scaler = StandardScaler()
         self.encoder = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
         self.ip_map: Optional[pd.DataFrame] = None
 
-    def fit_ip_map(self, ip_map: pd.DataFrame):
+    def fit_ip_map(self, ip_map: pd.DataFrame) -> None:
+        """Sets the IP-to-country mapping dataframe."""
         self.ip_map = ip_map
 
     def get_country(self, ip: int) -> str:
+        """Maps an integer IP address to a country string."""
         if self.ip_map is None:
             return "Unknown"
         match = self.ip_map[
             (self.ip_map['lower_bound_ip_address'] <= ip) &
             (self.ip_map['upper_bound_ip_address'] >= ip)
         ]
-        return match['country'].iloc[0] if not match.empty else "Unknown"
+        return str(match['country'].iloc[0]) if not match.empty else "Unknown"
 
     def engineer_time_features(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Creates time-based features from signup and purchase timestamps."""
         df = df.copy()
         df['hour_of_day'] = df['purchase_time'].dt.hour
         df['day_of_week'] = df['purchase_time'].dt.dayofweek
@@ -33,6 +39,7 @@ class FeatureEngineer:
         return df
 
     def calculate_velocity(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Calculates transaction count for each user in the last 24 hours."""
         df_sorted = df.sort_values(['user_id', 'purchase_time']).reset_index(drop=True)
         df_indexed = df_sorted.set_index('purchase_time')
         
@@ -48,6 +55,7 @@ class FeatureEngineer:
         return df_sorted
 
     def transform(self, df: pd.DataFrame, is_training: bool = False, velocity_override: Optional[int] = None) -> pd.DataFrame:
+        """Applies the full transformation pipeline to the input dataframe."""
         # 1. Add country
         if 'country' not in df.columns and self.ip_map is not None:
             df['country'] = df['ip_address'].apply(self.get_country)
