@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from src.features.engineering import FeatureEngineer
 from src.features.feature_store import FeatureStore
+from src.data.loader import DataLoader
 from src.utils.config import Config
 from datetime import datetime
 
@@ -45,3 +46,16 @@ def test_feature_store_velocity(fs):
 
 def test_get_country_unknown(fe):
     assert fe.get_country(123456) == "Unknown"
+
+def test_config_paths(config):
+    assert "data-set" in config.RAW_DATA_PATH
+    assert "Fraud_Data.csv" in config.FRAUD_DATA_PATH
+
+def test_feature_store_reset(fs):
+    fs.update_and_get_velocity(1, datetime.now())
+    fs.reset()
+    assert len(fs.user_tx_history) == 0
+
+def test_data_loader_init(config):
+    loader = DataLoader(config)
+    assert loader.config == config

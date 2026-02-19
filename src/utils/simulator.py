@@ -8,18 +8,29 @@ from src.utils.config import Config
 from src.data.loader import DataLoader
 
 class TransactionSimulator:
+    """Simulates real-time transaction traffic by sampling from the historical dataset."""
+    
     def __init__(self, api_url: str = "http://localhost:8000/predict"):
+        """Initializes the simulator with the target API URL and loads reference data."""
         self.api_url = api_url
         self.config = Config()
         self.loader = DataLoader(self.config)
         self.df_raw = self.loader.load_fraud_data()
         
         # In-memory state for windowed features (transaction velocity)
-        # key: user_id, value: list of timestamps of recent transactions
         self.user_state = {}
 
     def get_velocity(self, user_id: int, window_minutes: int = 1440) -> int:
-        """Calculates transaction velocity in the last X minutes."""
+        """
+        Calculates transaction velocity in the last X minutes.
+        
+        Args:
+            user_id (int): The ID of the user to check.
+            window_minutes (int): The lookback window in minutes.
+            
+        Returns:
+            int: The count of transactions in the window.
+        """
         now = datetime.now()
         if user_id not in self.user_state:
             return 0
@@ -30,8 +41,13 @@ class TransactionSimulator:
         
         return len(self.user_state[user_id])
 
-    def send_transaction(self):
-        """Sends a random transaction from the dataset to the API."""
+    def send_transaction(self) -> Optional[Dict[str, Any]]:
+        """
+        Samples a random transaction from the dataset and sends it to the API.
+        
+        Returns:
+            Optional[Dict]: The API response if successful, else None.
+        """
         row = self.df_raw.sample(n=1).iloc[0]
         
         # Update state (simulated 'now')
@@ -63,7 +79,14 @@ class TransactionSimulator:
             print(f"Failed to send transaction: {e}")
             return None
 
-    def run(self, num_tx: int = 10, delay: float = 1.0):
+    def run(self, num_tx: int = 10, delay: float = 1.0) -> None:
+        """
+        Starts the simulation loop.
+        
+        Args:
+            num_tx (int): Number of transactions to simulate.
+            delay (float): Delay in seconds between transactions.
+        """
         print(f"Starting simulation. Sending {num_tx} transactions to {self.api_url}...")
         for i in range(num_tx):
             self.send_transaction()
